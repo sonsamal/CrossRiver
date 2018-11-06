@@ -50,8 +50,16 @@ def lambda_handler(event, context):
     item = response['Item']
     print("GetItem succeeded:",item)
     # print(json.dumps(item, indent=4, cls=DecimalEncoder))
-    return item
-    # return {
-    #     'statusCode': 200,
-    #     'body': event['params']['querystring']['year']
-    # }
+    data = {}
+    data['LoanSum'] = str(int(float(item['LoanSum'])))
+    data['FundSum'] = str(int(float(item['FundSum'])))
+    data['FundSumInv'] = str(int(float(item['FundSumInv'])))
+    graph1 = json.loads(item['Graph1'])
+    data['Graph1'] = [{'x':list(graph1.keys()),'y':list(graph1.values()),'type':'bar'}]
+    data['Graph2'] = json.loads(item['Graph2'])
+    
+    for item in data['Graph2']:
+        data['Graph2'][item]['mode'] = 'lines'
+        data['Graph2'][item]['name'] = item
+    
+    return data

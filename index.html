@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script
+  src="https://code.jquery.com/jquery-3.3.1.js"
+  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+  crossorigin="anonymous"></script>
+<style>
+.loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #3498db;
+  width: 120px;
+  height: 120px;
+  -webkit-animation: spin 2s linear infinite; /* Safari */
+  animation: spin 2s linear infinite;
+  left:  50%;
+  top:   50%;
+  position: fixed;
+  visibility: hidden;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+#outerbox {
+    width: 100%;
+    height: 200px;
+    display: flex;
+}
+#innerboxes {
+    padding: 1em;
+    border: 2px solid black;
+    height: auto;
+    width: 27%;
+    display: inline-block;
+    margin: 0.5em;
+}
+#upperinner {
+    width: 100%;
+    /* margin: 20%; */
+    height: auto;
+}
+#line{
+	width:100%;
+	height:2px;
+	background-color: black;
+	color: black;
+}
+#upperinnerpara {
+	margin: 1%;
+	font-size: 20px;
+}
+#lowerinner {
+	height: auto;
+	width: 100%;
+	margin-top: 5px;
+}
+#header{
+	width: 100%;
+	height: 200px;
+	position: relative;
+}
+#boxes {
+	position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+#number{
+    font-size: 30px;
+    font-family: initial;
+    color: blue;
+    font-weight: bold;
+    align-content: center;
+    text-align: center;
+}
+#verticalline {
+	background-color: black;
+	width: 4px;
+	height: 100%;
+}
+.option-title{
+	display: inline-block;
+}
+.generate{
+	background: #008CBA;
+	color: white;
+	border: none;
+	box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	padding: 10px;
+	padding-left: 10px;
+	padding-right: 10px;
+	transition: 0.3s;
+	font-weight: bold;
+}
+.generate:hover{
+	opacity: 0.6
+}
+.year{
+	color: black;
+	border: none;
+	box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	padding: 10px;
+	padding-left: 10px;
+	padding-right: 10px;
+	transition: 0.3s;
+	font-weight: bold;	
+}
+#graphbox1 {
+	width: 45%;
+    height: 100%;
+    display: inline-block;
+    margin: 2%;
+    border: 2px solid;
+}
+#graphbox2 {
+	width: 45%;
+    height: 100%;
+    display: inline-block;
+    margin: 2%;
+    border: 2px solid;
+}
+#graphboxes {
+	width: 100%;
+    height: 300px;
+}
+</style>
+<body>
+<div class="loader"></div>
+<div id= "header">
+	<div id = "boxes">
+		<table>
+			<tr>
+				<td class="dropdown-backgrnd">
+					<h5 class="option-title">Select Year</h5>
+					<select class="year">
+						<option>2007</option>
+						<option>2008</option>
+						<option>2009</option>
+						<option>2010</option>
+						<option>2011</option>
+            <option>2012</option>
+            <option>2013</option>
+            <option>2014</option>
+            <option>2015</option>
+            <option>2016</option>
+					</select>
+				</td>
+				<td><input type="button" name="generate" class="generate" value="Generate Report"></td>
+			</tr>
+		</table>
+	</div>
+</div>
+<div id="outerbox">
+
+	<div id="innerboxes">
+		<div id="upperinner">
+			<p id="upperinnerpara">Total Amount Paid for</p>
+		</div>
+		<div id="line">
+		</div>
+		<div id="lowerinner">
+			<p id = "number" class="num1"></p>
+		</div>
+	</div>
+	<div id="innerboxes">
+		<div id="upperinner">
+			<p id="upperinnerpara">Total Amount Funded</p>
+		</div>
+		<div id="line">
+		</div>
+		<div id="lowerinner">
+			<p id = "number" class="num2"></p>
+		</div>
+	</div>
+	<div id="innerboxes">
+		<div id="upperinner">
+			<p id="upperinnerpara">Total Committed by Investors</p>
+		</div>
+		<div id="line">
+		</div>
+		<div id="lowerinner">
+			<p id = "number" class="num3"></p>
+		</div>
+	</div>
+</div>
+
+
+<div id= "graphboxes">
+	<div id = "graphbox1">
+		
+	</div>
+	<div id = "graphbox2"></div> 
+</div>
+</body>
+<script type="text/javascript">
+	$('.generate').click(function(){
+    var element = document.getElementsByClassName('loader')[0];
+    element.style.visibility = 'visible';
+		console.log($('.year').val());
+			$.ajax({
+				url: "https://2aioxkyuej.execute-api.us-east-2.amazonaws.com/v1/processdata",
+				method: "get",
+				contentType: "application/json",
+				data: {"year": $('.year').val()},
+				success: function(result){
+					$('.num1').html("$"+result['LoanSum']);
+					$('.num2').html("$"+result['FundSum']);
+					$('.num3').html("$"+result['FundSumInv']);
+        			console.log(result);
+          graph2Plotting(result);
+          graph1plotting(result);
+          var element = document.getElementsByClassName('loader')[0];
+          element.style.visibility = 'hidden';
+    
+    			},
+    			error: function(err){
+            var element = document.getElementsByClassName('loader')[0];
+            element.style.visibility = 'hidden';
+    
+    				console.log(err);
+    			}
+    		});
+	});
+console.log(document.getElementById('graphbox1'));
+
+function graph1plotting(result){
+var data = [{
+  x: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  y: [18132775.0, 19326050.0, 25043450.0, 23528025.0, 27198700.0, 24700500.0, 30730425.0, 32850600.0, 32036025.0, 37177550.0, 35058250.0, 39520800.0],
+  type: 'bar'
+}];
+var w = document.getElementById('graphbox1').offsetWidth;
+var h = document.getElementById('graphbox1').offsetHeight;
+ 
+
+var layout = {
+  title: 'Monthly Loan Volume',
+  xaxis: {
+    title: 'Month',
+    /*titlefont: {
+      family: 'Courier New, monospace',
+      size: 18,
+      color: '#7f7f7f'
+    }*/
+  },
+  yaxis: {
+    title: 'Loan Volume',
+    /*titlefont: {
+      family: 'Courier New, monospace',
+      size: 18,
+      color: '#7f7f7f'
+    }*/
+  }
+};
+Plotly.newPlot('graphbox1', result['Graph1'], layout);
+}
+</script>
+<script type="text/javascript">
+/*var A = {
+  x: [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ],
+  y: [
+      7569.186046511628,
+      8074.111675126904,
+      7549.545454545455,
+      8854.52380952381,
+      8367.584745762711,
+      8385.337552742616,
+      8610.040983606557,
+      8430.970149253732,
+      8591.42857142857,
+      9117.881355932202,
+      8343.821292775665,
+      9085.70110701107
+    ],
+  mode: 'lines',
+  name: 'A'
+};
+
+var B = {
+  x: [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ],
+  y: [
+      10088.207547169812,
+      10762.386363636364,
+      10642.084942084943,
+      11817.139175257733,
+      11484.429824561403,
+      10497.868217054263,
+      11262.192982456141,
+      11494.469026548673,
+      11459.55223880597,
+      11100,
+      10731.728045325779,
+      11947.303206997085
+    ],
+  mode: 'lines',
+  name: 'B'
+};
+
+var C = {
+  x: [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ],
+  y: [
+      9758.720930232557,
+      10744.558823529413,
+      10568.30357142857,
+      10672.459893048128,
+      11118.75,
+      11372.47191011236,
+      10781.818181818182,
+      10849.479166666666,
+      11487.844036697248,
+      11130.673076923076,
+      10845.785440613026,
+      12294.384057971014
+    ],
+  mode: 'lines',
+  name: 'C'
+};
+var D = {
+  x: [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ],
+  y: [
+      12411.855670103092,
+      10770.338983050848,
+      11496.551724137931,
+      10748.581560283688,
+      13796.24060150376,
+      11950.840336134454,
+      11515.650406504064,
+      12207.267441860466,
+      12044.907407407407,
+      13764.207650273223,
+      13935.539215686274,
+      14819.010416666666
+    ],
+  mode: 'lines',
+  name: 'D'
+};
+
+var E = {
+  x: [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ],
+  y: [
+      13464.53488372093,
+      13521.052631578947,
+      14322.826086956522,
+      15391.25,
+      15676.027397260274,
+      15817.553191489362,
+      16061.71875,
+      18364.935064935064,
+      17074.375,
+      16799.166666666668,
+      17071.830985915494,
+      16385.81081081081
+    ],
+  mode: 'lines',
+  name: 'E'
+};
+
+var F = {
+  x: [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ],
+  y: [
+      17444.23076923077,
+      17608.333333333332,
+      13344.791666666666,
+      18745.714285714286,
+      21036.842105263157,
+      20547.5,
+      17085.576923076922,
+      19645.833333333332,
+      19249.305555555555,
+      20013.157894736843,
+      18740.833333333332,
+      21280
+    ],
+  mode: 'lines',
+  name: 'F'
+};
+*/
+
+function graph2Plotting(result){
+
+  graph2 = result['Graph2']
+  var data = []
+  for(var key in graph2)
+    data.push(graph2[key])
+  // var data = [ A, B, C, D, E, F ];
+
+  var layout = {
+    title:'Loan By Credit Grade'
+  };
+
+  Plotly.newPlot('graphbox2', data, layout);
+}
+</script>
+</html>
